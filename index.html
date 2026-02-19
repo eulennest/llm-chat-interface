@@ -191,7 +191,7 @@
 <body>
     <div class="header">
         <div class="config">
-            <input type="text" id="apiUrl" placeholder="API Base URL (z.B. http://192.168.200.46:8080/v1)" />
+            <input type="text" id="apiUrl" placeholder="API Base URL (z.B. http://192.168.200.46:8080)" />
             <select id="modelSelect">
                 <option value="">Model laden...</option>
             </select>
@@ -246,13 +246,24 @@
         const savedModel = localStorage.getItem('model');
         if (savedUrl) apiUrlInput.value = savedUrl;
         
+        // Normalize base URL (add /v1 if not present)
+        function normalizeBaseUrl(url) {
+            url = url.trim().replace(/\/+$/, ''); // Remove trailing slashes
+            if (!url.endsWith('/v1')) {
+                url += '/v1';
+            }
+            return url;
+        }
+        
         // Load models
         async function loadModels() {
-            const baseUrl = apiUrlInput.value.trim();
+            let baseUrl = apiUrlInput.value.trim();
             if (!baseUrl) {
                 setStatus('Bitte API URL eingeben', 'error');
                 return;
             }
+            
+            baseUrl = normalizeBaseUrl(baseUrl);
             
             try {
                 setStatus('Lade Modelle...', '');
@@ -292,13 +303,15 @@
             const text = messageInput.value.trim();
             if (!text || isLoading) return;
             
-            const baseUrl = apiUrlInput.value.trim();
+            let baseUrl = apiUrlInput.value.trim();
             currentModel = modelSelect.value;
             
             if (!baseUrl || !currentModel) {
                 setStatus('Bitte API URL und Model auswählen', 'error');
                 return;
             }
+            
+            baseUrl = normalizeBaseUrl(baseUrl);
             
             // Add user message
             messages.push({ role: 'user', content: text });

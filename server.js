@@ -13,17 +13,23 @@ app.use(express.static('.'));
 // Proxy endpoint for LLM API calls
 app.post('/api/chat', async (req, res) => {
   try {
-    const { url, body, headers } = req.body;
+    const { url, body, headers, method = 'POST' } = req.body;
     
-    // Server-side fetch (no CORS restrictions)
-    const response = await fetch(url, {
-      method: 'POST',
+    const options = {
+      method: method,
       headers: {
         'Content-Type': 'application/json',
         ...headers
-      },
-      body: JSON.stringify(body)
-    });
+      }
+    };
+    
+    // Only add body for POST/PUT/PATCH
+    if (body && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
+      options.body = JSON.stringify(body);
+    }
+    
+    // Server-side fetch (no CORS restrictions)
+    const response = await fetch(url, options);
     
     const data = await response.json();
     res.json(data);

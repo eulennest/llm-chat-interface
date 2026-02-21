@@ -226,12 +226,15 @@
     <script>
         // State
         // Server-side proxy to avoid CORS
+        // Server-side proxy to avoid CORS
         async function proxyFetch(url, options = {}) {
+            const method = options.method || 'GET';
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     url: url,
+                    method: method,
                     body: options.body ? JSON.parse(options.body) : undefined,
                     headers: options.headers || {}
                 })
@@ -239,6 +242,7 @@
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return response;
         }
+
 
         let messages = [];
         let currentModel = '';
